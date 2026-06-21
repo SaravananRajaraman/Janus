@@ -1,4 +1,6 @@
-# Janus
+<p align="center">
+  <img src="assets/logo.png" alt="Janus" width="480">
+</p>
 
 **AI-powered file organiser with human-in-the-loop approval.**
 

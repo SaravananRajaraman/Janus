@@ -62,4 +62,9 @@ def create_app(
 
         app.mount("/static", StaticFiles(directory=str(web_dir)), name="static")
 
+    # Serve brand assets (logo, icons, favicon)
+    assets_dir = Path(__file__).parent.parent / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
     return app

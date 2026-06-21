@@ -1,0 +1,13 @@
+# Liminal Architecture
+
+A design philosophy rooted in the moment of passage — the charged instant between two states, where one world ends and another begins. Liminal Architecture does not celebrate the departure or the arrival; it venerates the threshold itself. Form exists to frame this suspension, giving visual weight to the invisible.
+
+Space is defined by what passes through it. The arch — ancient and absolute — is not decorative but structural in the deepest sense: it holds open a portal between disorder and order, between question and answer. Every composition is built around this central aperture, this breathing hole in solid matter. Negative space is not absence; it is the subject. The void within the arch is where meaning lives, and it demands to be rendered with painstaking craft — the proportions of a Roman arch studied and reinterpreted with the obsessive precision of a master stonemason working stone by stone.
+
+Duality is never conflict; it is completion. Left and right, warm and cool, electric blue and vital green — these are not opposites but complementary halves of a single truth. Colour is used surgically: one hue for the analytical, one for the human, and each bleeds into the other at the threshold with the soft inevitability of dawn meeting dusk. The palette is spare, chosen with the kind of restraint that takes hundreds of decisions to achieve — dark ground, luminous accent, nothing wasted.
+
+Light does not illuminate in Liminal Architecture; it *reveals*. Glows emerge from within surfaces rather than falling from above. The arch opening holds a faint inner light — as if the space between the columns is slightly warmer than the world surrounding it. This requires the craft of a painter who has studied chiaroscuro for decades: the gradient must feel discovered, not manufactured.
+
+Typography is architectural, not decorative. Letters are chosen for their geometric authority — forms as precisely engineered as the arch they accompany. The wordmark stands alone, spaced with the deliberate calm of an inscription carved in stone: permanent, unhurried, absolutely sure of itself. Supporting text is a whisper — present only to anchor context, light enough to be mistaken for a shadow.
+
+The final work must appear to have been made by someone for whom craft is a discipline, not a skill — the product of countless refinements, of choices reconsidered and revised until every element justifies its existence. Nothing is placed casually. Every radius, every weight, every margin is the result of painstaking attention. The composition should produce the quiet confidence that comes from true mastery: no flourishes, no apology, nothing to prove — only the threshold, held open.
