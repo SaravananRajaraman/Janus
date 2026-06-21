@@ -142,6 +142,14 @@
   .save-msg  { display: inline-block; margin-left: 12px; font-size: 12px; color: var(--accent2); opacity: 0; transition: opacity .3s; }
   .save-msg.show { opacity: 1; }
 
+  /* ── Stale card ── */
+  .card-stale { border-color: #3d2a0a; }
+  .stale-banner {
+    background: #2d1e08; border: 1px solid #5c3d10; border-radius: 6px;
+    padding: 8px 12px; font-size: 12px; color: var(--warn);
+    margin-bottom: 12px; line-height: 1.4;
+  }
+
   /* ── Empty state ── */
   .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
   .empty .icon { font-size: 48px; margin-bottom: 12px; }
@@ -272,12 +280,15 @@ function confClass(c) {
 }
 
 function renderCard(item) {
-  const p   = item.proposal || {};
-  const tid = item.thread_id;
+  const p    = item.proposal || {};
+  const tid  = item.thread_id;
   const conf = p.confidence != null ? p.confidence : 0;
   const pct  = Math.round(conf * 100);
+  // A card with no proposal data is a stale entry from a pre-Phase-4 run
+  const isStale = !item.proposal;
   return `
-<div class="card" id="card-${tid}">
+<div class="card${isStale ? ' card-stale' : ''}" id="card-${tid}">
+  ${isStale ? `<div class="stale-banner">⚠ Stale entry — no checkpoint found. Dismiss to clear, or restart Janus and let it redetect the file.</div>` : ''}
   <div class="card-head">
     <span class="card-filename">${esc(item.filename)}</span>
     <span class="badge ${confClass(conf)}">${pct}% confidence</span>
@@ -294,9 +305,12 @@ function renderCard(item) {
   </div>
   ${p.summary ? `<div class="summary">${esc(p.summary)}</div>` : ''}
   <div class="card-actions">
-    <button class="btn btn-approve" onclick="doApprove('${tid}')">✓ Approve</button>
-    <button class="btn btn-edit" onclick="toggleEdit('${tid}')">✎ Edit</button>
-    <button class="btn btn-reject" onclick="doReject('${tid}')">✗ Reject</button>
+    ${isStale
+      ? `<button class="btn btn-reject" onclick="doDismiss('${tid}')">✕ Dismiss stale entry</button>`
+      : `<button class="btn btn-approve" onclick="doApprove('${tid}')">✓ Approve</button>
+         <button class="btn btn-edit" onclick="toggleEdit('${tid}')">✎ Edit</button>
+         <button class="btn btn-reject" onclick="doReject('${tid}')">✗ Reject</button>`
+    }
   </div>
   <div class="edit-form" id="edit-${tid}">
     <label>Rename to</label>
@@ -321,7 +335,12 @@ async function doApprove(tid) {
   try {
     await api('POST', `/api/approve/${tid}`, {});
     removeCard(tid); loadStats();
-  } catch(e) { alert('Approve failed: ' + e.message); enable(tid); }
+  } catch(e) {
+    let msg = e.message;
+    try { msg = JSON.parse(msg).detail || msg; } catch(_) {}
+    alert('Approve failed: ' + msg);
+    enable(tid);
+  }
 }
 
 async function doApproveEdit(tid) {
@@ -340,7 +359,24 @@ async function doReject(tid) {
   try {
     await api('POST', `/api/reject/${tid}`, {});
     removeCard(tid); loadStats();
-  } catch(e) { alert('Reject failed: ' + e.message); enable(tid); }
+  } catch(e) {
+    // 409 = no checkpoint (stale or still processing)
+    if (e.message && e.message.includes('"status":409') || e.message.includes('409')) {
+      alert('Cannot reject: ' + JSON.parse(e.message).detail);
+    } else {
+      alert('Reject failed: ' + e.message);
+    }
+    enable(tid);
+  }
+}
+
+async function doDismiss(tid) {
+  if (!confirm('Remove this stale entry from the queue? The file itself will not be touched.')) return;
+  disable(tid);
+  try {
+    await api('POST', `/api/dismiss/${tid}`, {});
+    removeCard(tid); loadStats();
+  } catch(e) { alert('Dismiss failed: ' + e.message); enable(tid); }
 }
 
 function removeCard(tid) {
