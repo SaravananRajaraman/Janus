@@ -1,0 +1,81 @@
+watch:
+- ~/Downloads
+- ~/Desktop
+categories:
+  Images:
+    destination: ~/Documents/Organised/Images
+    extensions:
+    - .jpg
+    - .jpeg
+    - .png
+    - .gif
+    - .bmp
+    - .svg
+    - .webp
+    - .heic
+    - .tiff
+  Documents:
+    destination: ~/Documents/Organised/Documents
+    extensions:
+    - .pdf
+    - .doc
+    - .docx
+    - .odt
+    - .rtf
+    - .pages
+  Spreadsheets:
+    destination: ~/Documents/Organised/Spreadsheets
+    extensions:
+    - .xls
+    - .xlsx
+    - .csv
+    - .ods
+    - .numbers
+  Presentations:
+    destination: ~/Documents/Organised/Presentations
+    extensions:
+    - .ppt
+    - .pptx
+    - .odp
+    - .key
+  Code:
+    destination: ~/Documents/Organised/Code
+    extensions:
+    - .py
+    - .js
+    - .ts
+    - .html
+    - .css
+    - .json
+    - .yaml
+    - .toml
+    - .sh
+    - .rs
+    - .go
+    - .java
+  Text:
+    destination: ~/Documents/Organised/Text
+    extensions:
+    - .txt
+    - .md
+  Archives:
+    destination: ~/Documents/Organised/Archives
+    extensions:
+    - .zip
+    - .tar
+    - .gz
+    - .7z
+    - .rar
+    - .bz2
+  Other:
+    destination: ~/Documents/Organised/Other
+    extensions: []
+llm:
+  provider: ollama
+  model: qwen3.5
+settings:
+  dashboard_port: 8000
+  db_path: .organiser/organiser.db
+  dupes_path: .organiser/.dupes
+  content_max_chars: 4000
+  dry_run: false
