@@ -83,6 +83,58 @@ def reject(thread_id: str, body: RejectBody, request: Request):
     return {"ok": True}
 
 
+def _resume_all_pending(request: Request, *, approved: bool) -> dict:
+    """Resume every pending thread with the same decision (approve or reject).
+
+    Stale entries with no live checkpoint are skipped (clear them with Dismiss
+    All). Returns counts so the UI can report what happened.
+    """
+    graph = request.app.state.graph
+    conn  = request.app.state.conn
+
+    from src.db import get_pending_threads
+    rows = get_pending_threads(conn)
+
+    done = skipped = errors = 0
+    label = "approve-all" if approved else "reject-all"
+
+    for row in rows:
+        thread_id = row["thread_id"]
+        try:
+            snap = graph.get_state({"configurable": {"thread_id": thread_id}})
+            if not snap or not snap.values:
+                skipped += 1
+                continue
+        except Exception:
+            skipped += 1
+            continue
+
+        try:
+            graph.invoke(
+                Command(resume={"approved": approved}),
+                config={"configurable": {"thread_id": thread_id}},
+            )
+            done += 1
+        except Exception as exc:
+            print(f"[{label}] error on {thread_id}: {exc}")
+            errors += 1
+
+    key = "approved" if approved else "rejected"
+    return {key: done, "skipped": skipped, "errors": errors}
+
+
+@router.post("/approve-all")
+def approve_all(request: Request):
+    """Approve every pending file in the queue (rename + move each)."""
+    return _resume_all_pending(request, approved=True)
+
+
+@router.post("/reject-all")
+def reject_all(request: Request):
+    """Reject every pending file in the queue."""
+    return _resume_all_pending(request, approved=False)
+
+
 @router.post("/dismiss/{thread_id}")
 def dismiss(thread_id: str, request: Request):
     """Remove a stale pending entry from the queue without resuming the graph."""

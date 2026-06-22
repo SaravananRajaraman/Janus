@@ -321,6 +321,8 @@
   <!-- Queue tab -->
   <section class="tab active" id="tab-queue">
     <div class="queue-bulk-bar" id="queue-bulk-bar" style="display:none">
+      <button class="btn btn-approve" id="btn-approve-all" onclick="doApproveAll()">✅ Approve All</button>
+      <button class="btn btn-reject" id="btn-reject-all" onclick="doRejectAll()">✕ Reject All</button>
       <button class="btn-dismiss-all" onclick="doDismissAll()">🗑 Dismiss All</button>
       <span class="queue-bulk-hint" id="queue-bulk-hint"></span>
     </div>
@@ -634,6 +636,48 @@ async function undoMove(tid) {
     let msg = e.message;
     try { msg = JSON.parse(msg).detail || msg; } catch(_) {}
     showToast('Undo failed: ' + msg, 5000);
+  }
+}
+
+async function doApproveAll() {
+  const n = document.querySelectorAll('.card .btn-approve').length;
+  if (!confirm('Approve all ' + n + ' pending file' + (n===1?'':'s') + '? Each will be renamed and moved to its destination.')) return;
+  const btn = document.getElementById('btn-approve-all');
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Approving…';
+  try {
+    const r = await api('POST', '/api/approve-all');
+    const msg = (r.approved ? '✅ Approved ' + r.approved + ' file' + (r.approved===1?'':'s') : 'Nothing to approve')
+      + (r.skipped ? ' · ' + r.skipped + ' stale (use Dismiss All)' : '')
+      + (r.errors  ? ' · ' + r.errors + ' error(s)' : '');
+    showToast(msg, 4500);
+    await loadQueue(); await loadStats();
+  } catch(e) {
+    let msg = e.message; try { msg = JSON.parse(msg).detail || msg; } catch(_) {}
+    showToast('Approve all failed: ' + msg, 5000);
+  } finally {
+    btn.disabled = false; btn.textContent = orig;
+  }
+}
+
+async function doRejectAll() {
+  const n = document.querySelectorAll('.card .btn-reject').length;
+  if (!confirm('Reject all ' + n + ' pending file' + (n===1?'':'s') + '?')) return;
+  const btn = document.getElementById('btn-reject-all');
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '⏳ Rejecting…';
+  try {
+    const r = await api('POST', '/api/reject-all');
+    const msg = (r.rejected ? '✕ Rejected ' + r.rejected + ' file' + (r.rejected===1?'':'s') : 'Nothing to reject')
+      + (r.skipped ? ' · ' + r.skipped + ' stale (use Dismiss All)' : '')
+      + (r.errors  ? ' · ' + r.errors + ' error(s)' : '');
+    showToast(msg, 4500);
+    await loadQueue(); await loadStats();
+  } catch(e) {
+    let msg = e.message; try { msg = JSON.parse(msg).detail || msg; } catch(_) {}
+    showToast('Reject all failed: ' + msg, 5000);
+  } finally {
+    btn.disabled = false; btn.textContent = orig;
   }
 }
 
