@@ -15,7 +15,8 @@ class FileState(TypedDict):
     thread_id: str      # uuid per file; also the LangGraph thread_id
 
     # --- content extraction (Phase 1: extract node) ---
-    content: str | None  # extracted text, or None for non-text types
+    content: str | None   # extracted text, or None for non-text types
+    skip_content: bool    # True = skip file reading (scan mode, extension-only)
 
     # --- deduplication (Phase 3: dedupe node) ---
     file_hash: str      # SHA-256
@@ -41,6 +42,7 @@ def initial_state(path: str, filename: str, thread_id: str) -> FileState:
         filename=filename,
         thread_id=thread_id,
         content=None,
+        skip_content=False,
         file_hash="",
         is_duplicate=False,
         category="",

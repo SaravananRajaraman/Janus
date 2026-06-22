@@ -1,6 +1,7 @@
 watch:
 - ~/Downloads
 - ~/Desktop
+
 categories:
   Images:
     destination: ~/Documents/Organised/Images
@@ -38,6 +39,30 @@ categories:
     - .pptx
     - .odp
     - .key
+  Video:
+    destination: ~/Documents/Organised/Video
+    extensions:
+    - .mp4
+    - .mkv
+    - .avi
+    - .mov
+    - .wmv
+    - .m4v
+    - .webm
+    - .flv
+    - .ts
+    - .m2ts
+  Audio:
+    destination: ~/Documents/Organised/Audio
+    extensions:
+    - .mp3
+    - .flac
+    - .wav
+    - .aac
+    - .ogg
+    - .m4a
+    - .wma
+    - .opus
   Code:
     destination: ~/Documents/Organised/Code
     extensions:
@@ -67,15 +92,56 @@ categories:
     - .7z
     - .rar
     - .bz2
+  Installers:
+    destination: ~/Documents/Organised/Installers
+    extensions:
+    - .exe
+    - .msi
+    - .dmg
+    - .pkg
+    - .deb
+    - .rpm
+    - .appimage
   Other:
     destination: ~/Documents/Organised/Other
     extensions: []
+
 llm:
   provider: ollama
   model: qwen3.5
+
 settings:
   dashboard_port: 8000
   db_path: .organiser/organiser.db
   dupes_path: .organiser/.dupes
+  rejected_path: .organiser/.rejected
   content_max_chars: 4000
   dry_run: false
+
+# Drive-aware destination overrides (category -> absolute path on any drive)
+# Files classified into these categories go here instead of the default destination.
+drive_rules:
+  Video: "E:\\Movies"
+  # Audio: "E:\\Music"
+  # Archives: "E:\\Archives"
+
+# Drive scanner settings (used by the Scan tab in the dashboard)
+scan:
+  exclude_paths:
+    - "C:\\Windows"
+    - "C:\\Program Files"
+    - "C:\\Program Files (x86)"
+    - "C:\\ProgramData"
+    - "C:\\$Recycle.Bin"
+    - "C:\\System Volume Information"
+    - "C:\\Recovery"
+    - "C:\\PerfLogs"
+  max_files: 500
+  min_size_bytes: 1024
+
+# One-click "Organize All" behaviour + pipeline auto-approve
+auto_organize:
+  enabled: false
+  min_confidence: 0.85
+  skip_categories:
+    - Code

@@ -1,9 +1,12 @@
-"""POST /api/approve, /api/reject, /api/undo, /api/dismiss — resume paused graphs."""
+"""POST /api/approve, /api/reject, /api/organize, /api/undo, /api/dismiss."""
 from __future__ import annotations
+
+import json
 import shutil
 import traceback
 from pathlib import Path
 from typing import Optional
+
 from fastapi import APIRouter, HTTPException, Request
 from langgraph.types import Command
 from pydantic import BaseModel
@@ -11,15 +14,8 @@ from pydantic import BaseModel
 router = APIRouter()
 
 
-# ── helpers ──────────────────────────────────────────────────────────────────
-
 def _check_checkpoint(graph, thread_id: str):
-    """Raise 409 if no live checkpoint exists for this thread_id.
-
-    This catches two cases:
-      • Stale DB rows from previous runs (checkpoint was never saved or was wiped)
-      • Race window: file is still being processed (graph hasn't hit interrupt yet)
-    """
+    """Raise HTTP 409 if no live checkpoint exists for this thread_id."""
     try:
         snap = graph.get_state({"configurable": {"thread_id": thread_id}})
         if not snap or not snap.values:
@@ -28,7 +24,7 @@ def _check_checkpoint(graph, thread_id: str):
                 detail=(
                     "No active checkpoint for this file. "
                     "It may still be processing (refresh in a moment) "
-                    "or it's a stale entry — use Dismiss to clear it."
+                    "or it's a stale entry -- use Dismiss to clear it."
                 ),
             )
     except HTTPException:
@@ -36,11 +32,9 @@ def _check_checkpoint(graph, thread_id: str):
     except Exception:
         raise HTTPException(
             status_code=409,
-            detail="Could not verify checkpoint — file may still be processing.",
+            detail="Could not verify checkpoint -- file may still be processing.",
         )
 
-
-# ── request bodies ────────────────────────────────────────────────────────────
 
 class ApproveBody(BaseModel):
     rename_to:   Optional[str] = None
@@ -50,8 +44,9 @@ class ApproveBody(BaseModel):
 class RejectBody(BaseModel):
     note: Optional[str] = None
 
+class OrganizeBody(BaseModel):
+    min_confidence: float = 0.85
 
-# ── routes ────────────────────────────────────────────────────────────────────
 
 @router.post("/approve/{thread_id}")
 def approve(thread_id: str, body: ApproveBody, request: Request):
@@ -102,11 +97,105 @@ def dismiss(thread_id: str, request: Request):
     return {"ok": True}
 
 
+@router.post("/dismiss-all")
+def dismiss_all(request: Request):
+    """Dismiss every pending item in the queue in one shot.
+
+    Useful when a batch scan produced entries that can't be approved or rejected
+    (e.g. files from a virtual/cloud drive like Google Drive).
+    """
+    conn = request.app.state.conn
+    cur  = conn.execute(
+        "UPDATE action_log SET status='dismissed' WHERE status='pending'"
+    )
+    conn.commit()
+    count = cur.rowcount
+    from src.events import publish
+    publish({"type": "dismissed_all", "count": count})
+    return {"ok": True, "dismissed": count}
+
+
+@router.post("/dismiss-drive/{drive_letter}")
+def dismiss_drive(drive_letter: str, request: Request):
+    """Dismiss all pending items whose source path starts with <drive_letter>:.
+
+    e.g. POST /api/dismiss-drive/G  clears all G: drive entries.
+    """
+    conn   = request.app.state.conn
+    prefix = drive_letter.upper().rstrip(":") + ":\\"
+    cur    = conn.execute(
+        "UPDATE action_log SET status='dismissed' "
+        "WHERE status='pending' AND UPPER(path) LIKE ?",
+        (prefix.upper() + "%",),
+    )
+    conn.commit()
+    count = cur.rowcount
+    from src.events import publish
+    publish({"type": "dismissed_all", "count": count, "drive": drive_letter.upper()})
+    return {"ok": True, "dismissed": count, "drive": drive_letter.upper()}
+
+
+@router.post("/organize")
+def organize_all(body: OrganizeBody, request: Request):
+    """Batch-approve every pending file whose AI confidence meets the threshold.
+
+    Files below the threshold, or whose checkpoint is stale, are skipped.
+    Returns: { organized: int, skipped: int, errors: int }
+    """
+    graph     = request.app.state.graph
+    conn      = request.app.state.conn
+    organized = 0
+    skipped   = 0
+    errors    = 0
+
+    from src.db import get_pending_threads
+    rows = get_pending_threads(conn)
+
+    for row in rows:
+        d        = dict(row)
+        proposal = {}
+        raw      = d.get("proposal")
+        if raw:
+            try:
+                proposal = json.loads(raw)
+            except Exception:
+                pass
+
+        confidence = float(proposal.get("confidence", 0.0))
+        if confidence < body.min_confidence:
+            skipped += 1
+            continue
+
+        thread_id = d["thread_id"]
+
+        try:
+            snap = graph.get_state({"configurable": {"thread_id": thread_id}})
+            if not snap or not snap.values:
+                skipped += 1
+                continue
+        except Exception:
+            skipped += 1
+            continue
+
+        try:
+            graph.invoke(
+                Command(resume={"approved": True}),
+                config={"configurable": {"thread_id": thread_id}},
+            )
+            organized += 1
+        except Exception as exc:
+            print(f"[organize] error approving {thread_id}: {exc}")
+            errors += 1
+
+    return {"organized": organized, "skipped": skipped, "errors": errors}
+
+
 @router.post("/undo/{thread_id}")
 def undo(thread_id: str, request: Request):
     conn = request.app.state.conn
-    row = conn.execute(
-        "SELECT path, moved_to FROM action_log WHERE thread_id=? AND status='approved' ORDER BY id DESC LIMIT 1",
+    row  = conn.execute(
+        "SELECT path, moved_to FROM action_log "
+        "WHERE thread_id=? AND status='approved' ORDER BY id DESC LIMIT 1",
         (thread_id,),
     ).fetchone()
     if not row or not row["moved_to"]:

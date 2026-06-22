@@ -22,9 +22,15 @@ def get_db(db_path: str) -> sqlite3.Connection:
     """Open (and initialise if new) the organiser database."""
     path = Path(db_path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(path), check_same_thread=False)
+    # isolation_level=None -> autocommit: each statement commits immediately so the
+    # connection never holds the write lock between statements. Without this, the
+    # action-log conn and the checkpointer conn can deadlock on the same DB file
+    # (a true deadlock returns "database is locked" instantly, defeating busy_timeout).
+    conn = sqlite3.connect(str(path), check_same_thread=False, isolation_level=None)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=30000")   # wait up to 30 s instead of failing
+    conn.execute("PRAGMA synchronous=NORMAL")    # safe under WAL, far less fsync churn
     _init_schema(conn)
     return conn
 

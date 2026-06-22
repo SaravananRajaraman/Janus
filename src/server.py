@@ -1,22 +1,4 @@
-"""FastAPI application factory for the Janus dashboard.
-
-Usage
------
-  from src.server import create_app
-  app = create_app(conn, graph, rules_path="rules.yaml", port=8000)
-
-The app exposes:
-  GET  /api/queue      — pending approval items
-  POST /api/approve/{thread_id}
-  POST /api/reject/{thread_id}
-  POST /api/undo/{thread_id}
-  GET  /api/feed       — SSE live activity stream
-  GET  /api/stats      — metric counts
-  GET  /api/rules      — read rules.yaml
-  POST /api/rules      — write rules.yaml
-  GET  /api/activity   — recent action log rows
-  GET  /                — serves web/index.html (static SPA)
-"""
+"""FastAPI application factory for the Janus dashboard."""
 from __future__ import annotations
 
 import sqlite3
@@ -31,20 +13,49 @@ from src.api.resume import router as resume_router
 from src.api.feed   import router as feed_router
 from src.api.stats  import router as stats_router
 from src.api.rules  import router as rules_router
+from src.api.scan   import router as scan_router
 
 
 def create_app(
     conn: sqlite3.Connection,
     graph,
     *,
+    db_path: str,
     rules_path: str = "rules.yaml",
+    auto_organize: dict | None = None,
+    scan_config: dict | None = None,
+    skip_destinations: set | None = None,
 ) -> FastAPI:
     app = FastAPI(title="Janus", version="0.1.0", docs_url=None, redoc_url=None)
 
-    # Share state with route handlers via app.state
-    app.state.conn       = conn
-    app.state.graph      = graph
-    app.state.rules_path = rules_path
+    # Shared state accessible by all route handlers
+    app.state.conn              = conn
+    app.state.graph             = graph
+    app.state.db_path           = db_path
+    app.state.rules_path        = rules_path
+    app.state.auto_organize     = auto_organize or {}
+    app.state.scan_config       = scan_config or {}
+    app.state.skip_destinations = skip_destinations or set()
+    app.state.scan_status       = {
+        "running": False,
+        "found":   0,
+        "queued":  0,
+        "skipped": 0,
+        "errors":  0,
+        "current": "",
+    }
+
+    @app.get("/api/config", include_in_schema=False)
+    def get_config():
+        """Expose auto_organize config to the dashboard."""
+        ao = app.state.auto_organize
+        return {
+            "auto_organize": {
+                "enabled":         ao.get("enabled", False),
+                "min_confidence":  ao.get("min_confidence", 0.85),
+                "skip_categories": ao.get("skip_categories", ["Code"]),
+            }
+        }
 
     # API routes
     app.include_router(queue_router,  prefix="/api")
@@ -52,6 +63,7 @@ def create_app(
     app.include_router(feed_router,   prefix="/api")
     app.include_router(stats_router,  prefix="/api")
     app.include_router(rules_router,  prefix="/api")
+    app.include_router(scan_router,   prefix="/api")
 
     # Serve the dashboard SPA from web/
     web_dir = Path(__file__).parent.parent / "web"

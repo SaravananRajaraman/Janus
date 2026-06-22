@@ -1,4 +1,4 @@
-"""Janus — entry point and CLI.
+"""Janus -- entry point and CLI.
 
 Commands
 --------
@@ -36,32 +36,35 @@ def _load_rules(path: Path = _RULES_FILE) -> dict:
 
 def _start_server(app, port: int) -> None:
     """Run uvicorn in a background daemon thread."""
-    import uvicorn  # noqa: PLC0415
+    import uvicorn
     config = uvicorn.Config(app, host="127.0.0.1", port=port,
                             log_level="error", access_log=False)
     server = uvicorn.Server(config)
     t = threading.Thread(target=server.run, name="janus-server", daemon=True)
     t.start()
-    # Give uvicorn a moment so the first browser open works
     time.sleep(1.2)
-    print(f"[janus] dashboard → http://127.0.0.1:{port}")
+    print(f"[janus] dashboard -> http://127.0.0.1:{port}")
 
 
 def _shutdown(observer, *_) -> None:
-    print("\n[janus] shutting down…")
+    print("\n[janus] shutting down...")
     observer.stop()
     observer.join()
     sys.exit(0)
 
 
 def cmd_start(args: argparse.Namespace) -> None:
-    rules       = _load_rules()
-    settings    = rules.get("settings", {})
-    db_path     = settings["db_path"]
-    watch_dirs  = rules.get("watch", [])
-    categories  = rules.get("categories", {})
-    dupes_path  = settings.get("dupes_path", ".organiser/.dupes")
-    port        = int(settings.get("dashboard_port", 8000))
+    rules         = _load_rules()
+    settings      = rules.get("settings", {})
+    db_path       = settings["db_path"]
+    watch_dirs    = rules.get("watch", [])
+    categories    = rules.get("categories", {})
+    dupes_path    = settings.get("dupes_path",    ".organiser/.dupes")
+    rejected_path = settings.get("rejected_path", ".organiser/.rejected")
+    auto_organize = rules.get("auto_organize",    {})
+    drive_rules   = rules.get("drive_rules",      {})
+    scan_config   = rules.get("scan",             {})
+    port          = int(settings.get("dashboard_port", 8000))
 
     if not watch_dirs:
         sys.exit("[janus] no watch directories configured in rules.yaml")
@@ -70,7 +73,7 @@ def cmd_start(args: argparse.Namespace) -> None:
     provider = llm_cfg.get("provider", "ollama")
     model    = llm_cfg.get("model")
 
-    print(f"[janus] loading LLM: {provider} / {model or 'default'}…")
+    print(f"[janus] loading LLM: {provider} / {model or 'default'}...")
     try:
         llm   = get_llm(provider=provider, model=model)
         chain = make_chain(llm, categories)
@@ -78,34 +81,57 @@ def cmd_start(args: argparse.Namespace) -> None:
         sys.exit(f"[janus] failed to load LLM: {exc}")
 
     conn         = get_db(db_path)
-    checkpointer = make_checkpointer(db_path)
+    checkpointer = make_checkpointer(conn)
 
     graph = make_graph(
         conn,
         chain=chain,
         categories=categories,
+        drive_rules=drive_rules,
         checkpointer=checkpointer,
         dupes_path=dupes_path,
+        rejected_path=rejected_path,
+        auto_organize=auto_organize,
         dry_run=args.dry_run,
     )
 
-    # ── FastAPI dashboard ────────────────────────────────────────
-    from src.server import create_app  # noqa: PLC0415
-    app = create_app(conn, graph, rules_path=str(_RULES_FILE))
+    if auto_organize.get("enabled"):
+        min_c = auto_organize.get("min_confidence", 0.85)
+        skip  = auto_organize.get("skip_categories", [])
+        print(f"[janus] auto-organize ON  (>= {min_c:.0%} confidence, skip: {skip or 'none'})")
+    else:
+        print("[janus] auto-organize OFF  (all files need manual approval)")
+
+    if drive_rules:
+        for cat, dest in drive_rules.items():
+            print(f"[janus] drive rule: {cat} -> {dest}")
+
+    # Build the set of Janus-owned destination paths to skip during scanning
+    from src.scanner import build_skip_destinations
+    skip_destinations = build_skip_destinations(categories, drive_rules)
+
+    from src.server import create_app
+    app = create_app(
+        conn,
+        graph,
+        db_path=db_path,
+        rules_path=str(_RULES_FILE),
+        auto_organize=auto_organize,
+        scan_config=scan_config,
+        skip_destinations=skip_destinations,
+    )
     _start_server(app, port)
 
-    # ── Watchdog ─────────────────────────────────────────────────
     observer = start_watcher(watch_dirs, graph, dry_run=args.dry_run)
     signal.signal(signal.SIGTERM, lambda *a: _shutdown(observer))
 
-    # ── Tray icon (optional) ─────────────────────────────────────
     try:
-        from src.tray import start_tray       # noqa: PLC0415
-        from src.db   import count_by_status  # noqa: PLC0415, F811
+        from src.tray import start_tray
+        from src.db   import count_by_status as _cbs
 
         def _pending() -> int:
             try:
-                return count_by_status(conn).get("pending", 0)
+                return _cbs(conn).get("pending", 0)
             except Exception:
                 return 0
 
@@ -114,7 +140,7 @@ def cmd_start(args: argparse.Namespace) -> None:
     except Exception as exc:
         print(f"[tray] skipped: {exc}")
 
-    dry_label = "  [DRY RUN — no writes]" if args.dry_run else ""
+    dry_label = "  [DRY RUN -- no writes]" if args.dry_run else ""
     print(f"[janus] started.{dry_label}  Ctrl+C to stop.")
 
     try:
@@ -139,7 +165,7 @@ def cmd_status(args: argparse.Namespace) -> None:
 
 def cli() -> None:
     parser = argparse.ArgumentParser(prog="janus",
-        description="Janus — AI-powered file organiser with human-in-the-loop approval.")
+        description="Janus -- AI-powered file organiser with human-in-the-loop approval.")
     sub = parser.add_subparsers(dest="command", metavar="<command>")
 
     p_start = sub.add_parser("start", help="Start watcher + dashboard + tray")

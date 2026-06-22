@@ -18,10 +18,17 @@ from src.state import FileState
 def make_dedupe_node(conn: sqlite3.Connection):
     def node_dedupe(state: FileState) -> dict:
         path = Path(state["path"])
+
+        # In scan mode (skip_content=True) we never read the file — classification
+        # is by extension only, so content-based dedup is skipped too.
+        # Path-based dedup is already handled in scanner.py before graph.invoke().
+        if state.get("skip_content"):
+            return {"file_hash": "", "is_duplicate": False}
+
         try:
             file_hash = hashlib.sha256(path.read_bytes()).hexdigest()
-        except (OSError, PermissionError) as exc:
-            print(f"[dedupe] cannot read {path.name}: {exc}")
+        except Exception as exc:
+            print(f"[dedupe] cannot read {path.name}: {type(exc).__name__}: {exc}")
             file_hash = ""
 
         is_duplicate = hash_exists(conn, file_hash)

@@ -129,6 +129,135 @@
   .pill-pending   { background: #2d260a; color: var(--warn); }
   .pill-undone    { background: #2a1f36; color: #c084fc; }
 
+  /* ── Queue bulk actions bar ── */
+  .queue-bulk-bar {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .btn-dismiss-all {
+    background: var(--bg3); color: var(--muted); border: 1px solid var(--border);
+    padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500;
+    cursor: pointer; transition: color .15s, border-color .15s;
+  }
+  .btn-dismiss-all:hover { color: var(--danger); border-color: var(--danger); }
+  .queue-bulk-hint { font-size: 12px; color: var(--muted); }
+
+  /* ── Organize All bar ── */
+  .organize-bar {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .btn-organize {
+    background: var(--accent); color: #fff; border: none;
+    padding: 8px 18px; border-radius: 8px; font-size: 13px;
+    font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 7px;
+    transition: opacity .15s;
+  }
+  .btn-organize:hover { opacity: .85; }
+  .btn-organize:disabled { opacity: .45; cursor: not-allowed; }
+  .organize-hint {
+    font-size: 12px; color: var(--muted);
+  }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--bg2); border: 1px solid var(--border); color: var(--text);
+    padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999;
+    box-shadow: 0 4px 20px rgba(0,0,0,.4); opacity: 0;
+    transition: opacity .25s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ── Scan Tab ── */
+  .scan-drives-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px; margin-bottom: 20px;
+  }
+  .drive-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; cursor: pointer;
+    transition: border-color .15s, background .15s; user-select: none;
+  }
+  .drive-card.selected { border-color: var(--accent); background: #151b35; }
+  .drive-card input[type=checkbox] { display: none; }
+  .drive-letter { font-size: 26px; font-weight: 700; color: var(--accent); line-height: 1; }
+  .drive-meta   { font-size: 11px; color: var(--muted); margin-top: 5px; }
+  .drive-bar    { height: 3px; background: var(--bg3); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .drive-bar-fill { height: 100%; border-radius: 2px; background: var(--accent); }
+  .scan-actions { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+  .btn-scan     { background: var(--accent); color: #fff; }
+  .btn-scan-stop { background: var(--danger); color: #1a0505; }
+  .scan-progress-wrap { margin-bottom: 20px; }
+  .scan-progress-bar  { height: 6px; background: var(--bg3); border-radius: 3px; margin-bottom: 8px; overflow: hidden; }
+  .scan-progress-fill { height: 100%; border-radius: 3px; background: var(--accent); width: 0; transition: width .4s; }
+  .scan-progress-text { font-size: 12px; color: var(--muted); }
+  .scan-result-text   { font-size: 13px; color: var(--accent2); margin-top: 6px; }
+  .scan-hint { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 18px; }
+
+  /* ── Scan stats row ── */
+  .scan-stats-row {
+    display: flex; gap: 0; margin-bottom: 14px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .scan-stat {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    padding: 10px 6px; border-right: 1px solid var(--border);
+  }
+  .scan-stat:last-child { border-right: none; }
+  .scan-stat-n { font-size: 22px; font-weight: 700; line-height: 1; color: var(--text); }
+  .scan-stat-n.queued  { color: var(--accent2); }
+  .scan-stat-n.skipped { color: var(--muted); }
+  .scan-stat-n.errors  { color: var(--danger); }
+  .scan-stat-l { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; margin-top: 3px; }
+
+  /* ── Scan current file (pulsing) ── */
+  .scan-current-wrap {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; background: #0d1e35;
+    border: 1px solid var(--accent); border-radius: var(--radius);
+    margin-bottom: 8px; font-family: monospace; font-size: 12px;
+  }
+  .scan-current-wrap .spin { animation: spin 1s linear infinite; display:inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .scan-current-name { flex: 1; color: var(--accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .scan-current-idx  { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+
+  /* ── Deep scan toggle ── */
+  .scan-opt { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); cursor: pointer; }
+  .scan-opt input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+  .scan-opt:hover { color: var(--text); }
+
+  /* ── Scan live log ── */
+  .scan-log-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 11px; text-transform: uppercase; letter-spacing: .4px;
+    color: var(--muted); margin: 12px 0 6px;
+  }
+  .scan-log-clear {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 11px; padding: 2px 6px; border-radius: 4px;
+  }
+  .scan-log-clear:hover { color: var(--text); }
+  .scan-log {
+    max-height: 320px; overflow-y: auto; background: var(--bg2);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    font-family: monospace; font-size: 12px;
+  }
+  .scan-log-entry {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 10px; border-bottom: 1px solid var(--border);
+    animation: fadeIn .2s ease;
+  }
+  .scan-log-entry:last-child { border-bottom: none; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  .log-icon { font-size: 13px; flex-shrink: 0; }
+  .log-filename { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .log-result { font-size: 11px; flex-shrink: 0; padding: 1px 7px; border-radius: 10px; }
+  .log-result.queued  { background: #0d2e1a; color: var(--accent2); }
+  .log-result.skipped { background: var(--bg3); color: var(--muted); }
+  .log-result.error   { background: #2d1111; color: var(--danger); }
+  .log-idx { font-size: 10px; color: var(--muted); flex-shrink: 0; min-width: 40px; text-align: right; }
+
   /* ── Rules ── */
   .rules-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
   .rules-table th { text-align: left; padding: 8px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); border-bottom: 1px solid var(--border); }
@@ -183,6 +312,7 @@
 
 <nav>
   <button class="tab-btn active" onclick="showTab('queue')">Queue <span id="q-badge"></span></button>
+  <button class="tab-btn" onclick="showTab('scan')">🔍 Scan Drives</button>
   <button class="tab-btn" onclick="showTab('activity')">Activity</button>
   <button class="tab-btn" onclick="showTab('rules')">Rules</button>
 </nav>
@@ -190,7 +320,85 @@
 <main>
   <!-- Queue tab -->
   <section class="tab active" id="tab-queue">
+    <div class="queue-bulk-bar" id="queue-bulk-bar" style="display:none">
+      <button class="btn-dismiss-all" onclick="doDismissAll()">🗑 Dismiss All</button>
+      <span class="queue-bulk-hint" id="queue-bulk-hint"></span>
+    </div>
+    <div class="organize-bar" id="organize-bar" style="display:none">
+      <button class="btn-organize" id="btn-organize" onclick="doOrganizeAll()">
+        ⚡ Organize All
+      </button>
+      <span class="organize-hint" id="organize-hint"></span>
+    </div>
     <div class="queue-grid" id="queue-list"></div>
+  </section>
+
+  <!-- Scan tab -->
+  <section class="tab" id="tab-scan">
+    <p class="scan-hint">
+      Select drives to scan. Janus classifies every file and adds it to the approval queue.
+      System folders, already-organised paths, and files under 1 KB are skipped automatically.
+      Video files go to <strong>E:\Movies</strong> via <code>drive_rules</code> in rules.yaml.
+    </p>
+
+    <!-- Drive picker -->
+    <div class="scan-drives-grid" id="scan-drives-grid">
+      <span style="color:var(--muted);font-size:13px">Loading drives…</span>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="scan-actions">
+      <button class="btn btn-scan" id="btn-scan" onclick="doStartScan()">🔍 Scan Selected Drives</button>
+      <button class="btn btn-scan-stop" id="btn-scan-stop" onclick="doStopScan()" style="display:none">⏹ Stop</button>
+      <label class="scan-opt" title="Read file content for richer classification. Slower on large drives.">
+        <input type="checkbox" id="chk-deep-scan">
+        Deep scan (read file content)
+      </label>
+      <span id="scan-select-hint" style="color:var(--muted);font-size:12px"></span>
+    </div>
+
+    <!-- Progress panel (hidden until scan starts) -->
+    <div id="scan-progress-panel" style="display:none">
+      <!-- Stats counters -->
+      <div class="scan-stats-row">
+        <div class="scan-stat">
+          <span class="scan-stat-n" id="ss-found">0</span>
+          <span class="scan-stat-l">Found</span>
+        </div>
+        <div class="scan-stat">
+          <span class="scan-stat-n queued" id="ss-queued">0</span>
+          <span class="scan-stat-l">In Queue</span>
+        </div>
+        <div class="scan-stat">
+          <span class="scan-stat-n skipped" id="ss-skipped">0</span>
+          <span class="scan-stat-l">Skipped</span>
+        </div>
+        <div class="scan-stat">
+          <span class="scan-stat-n errors" id="ss-errors">0</span>
+          <span class="scan-stat-l">Errors</span>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="scan-progress-bar">
+        <div class="scan-progress-fill" id="scan-progress-fill"></div>
+      </div>
+      <div class="scan-progress-text" id="scan-progress-text">Scanning…</div>
+
+      <!-- Live file log -->
+      <div class="scan-log-header">
+        <span>Live progress</span>
+        <button class="scan-log-clear" onclick="clearScanLog()">Clear</button>
+      </div>
+      <div id="scan-current-wrap" class="scan-current-wrap" style="display:none">
+        <span class="spin">⟳</span>
+        <span class="scan-current-name" id="scan-current-name">—</span>
+        <span class="scan-current-idx" id="scan-current-idx"></span>
+      </div>
+      <div class="scan-log" id="scan-log"></div>
+    </div>
+
+    <div id="scan-result-text" class="scan-result-text"></div>
   </section>
 
   <!-- Activity tab -->
@@ -216,12 +424,70 @@
   </section>
 </main>
 
+<div class="toast" id="toast"></div>
+
+<div class="toast" id="toast"></div>
 <script>
 /* ================================================================
-   Janus Dashboard — vanilla JS, no build tool needed
+   Janus Dashboard
    ================================================================ */
 
-let _rulesCache = null;
+let _rulesCache  = null;
+let _configCache = null;
+let _scanLogCount = 0;
+const SCAN_LOG_MAX = 200;
+
+// ── Toast ────────────────────────────────────────────────────────
+function showToast(msg, duration) {
+  duration = duration || 3500;
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), duration);
+}
+
+// ── Config (auto_organize) ────────────────────────────────────────
+async function loadConfig() {
+  try {
+    const cfg = await api('GET', '/api/config');
+    _configCache = cfg.auto_organize;
+    const bar  = document.getElementById('organize-bar');
+    const hint = document.getElementById('organize-hint');
+    const pct  = Math.round((_configCache.min_confidence || 0.85) * 100);
+    const skip = (_configCache.skip_categories || []).join(', ') || 'none';
+    hint.textContent = 'Approves files above ' + pct + '% confidence (skip: ' + skip + ')';
+    bar.style.display = '';
+  } catch(e) {}
+}
+
+// ── Organize All ─────────────────────────────────────────────────
+async function doOrganizeAll() {
+  const btn     = document.getElementById('btn-organize');
+  const minConf = _configCache ? _configCache.min_confidence : 0.85;
+  btn.disabled  = true;
+  btn.textContent = '⏳ Organising…';
+  try {
+    const r = await api('POST', '/api/organize', { min_confidence: minConf });
+    const total = r.organized + r.skipped + r.errors;
+    const msg = r.organized === 0
+      ? (total === 0
+          ? 'Queue is empty — no files pending.'
+          : 'Nothing above ' + Math.round(minConf*100) + '% — ' + r.skipped + ' file' + (r.skipped===1?'':'s') + ' below threshold.')
+      : '✅ Organized ' + r.organized + ' file' + (r.organized===1?'':'s') +
+        (r.skipped ? ' · ' + r.skipped + ' below threshold' : '') +
+        (r.errors  ? ' · ' + r.errors + ' error(s)' : '');
+    showToast(msg, 4500);
+    await loadQueue();
+    await loadStats();
+  } catch(e) {
+    let msg = e.message;
+    try { msg = JSON.parse(msg).detail || msg; } catch(_) {}
+    showToast('Organize failed: ' + msg, 5000);
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = '⚡ Organize All';
+  }
+}
 
 // ── Tab switching ────────────────────────────────────────────────
 function showTab(id) {
@@ -231,6 +497,7 @@ function showTab(id) {
   event.target.classList.add('active');
   if (id === 'activity') loadActivity();
   if (id === 'rules')    loadRules();
+  if (id === 'scan')     loadScanDrives();
 }
 
 // ── API helpers ──────────────────────────────────────────────────
@@ -246,16 +513,13 @@ async function api(method, path, body) {
 async function loadStats() {
   try {
     const s = await api('GET', '/api/stats');
-    document.getElementById('s-pending').textContent = s.pending;
-    document.getElementById('s-moved').textContent   = s.moved_today;
-    document.getElementById('s-dupes').textContent   = s.duplicates;
-    document.getElementById('s-rej').textContent     = s.rejections;
-    const n = s.pending;
-    document.getElementById('tagline').textContent =
-      n === 0 ? 'All clear — the threshold is quiet.' :
-      n === 1 ? '1 file waiting at the door.' :
-                `${n} files waiting at the door.`;
-  } catch(e) { console.error('stats:', e); }
+    document.getElementById('s-pending').textContent = s.pending  || 0;
+    document.getElementById('s-moved').textContent   = s.moved_today || 0;
+    document.getElementById('s-dupes').textContent   = s.duplicates || 0;
+    document.getElementById('s-rej').textContent     = s.rejected || 0;
+    document.getElementById('tagline').textContent   =
+      (s.pending || 0) + ' file' + (s.pending===1?'':'s') + ' at the threshold';
+  } catch(e) {}
 }
 
 // ── Queue ────────────────────────────────────────────────────────
@@ -263,14 +527,21 @@ async function loadQueue() {
   const el = document.getElementById('queue-list');
   try {
     const items = await api('GET', '/api/queue');
-    document.getElementById('q-badge').textContent = items.length ? `(${items.length})` : '';
+    document.getElementById('q-badge').textContent = items.length ? '(' + items.length + ')' : '';
+    const bulkBar = document.getElementById('queue-bulk-bar');
+    const bulkHint = document.getElementById('queue-bulk-hint');
     if (!items.length) {
-      el.innerHTML = `<div class="empty"><div class="icon">🚪</div><p>No files waiting — the threshold is clear.</p></div>`;
+      el.innerHTML = '<div class="empty"><div class="icon">🚪</div><p>No files waiting — the threshold is clear.</p></div>';
+      if (bulkBar) bulkBar.style.display = 'none';
       return;
+    }
+    if (bulkBar) {
+      bulkBar.style.display = '';
+      if (bulkHint) bulkHint.textContent = items.length + ' item' + (items.length===1?'':'s') + ' in queue';
     }
     el.innerHTML = items.map(renderCard).join('');
   } catch(e) {
-    el.innerHTML = `<div class="empty"><p>Could not load queue: ${e.message}</p></div>`;
+    el.innerHTML = '<div class="empty"><p>Could not load queue: ' + e.message + '</p></div>';
   }
 }
 
@@ -285,208 +556,382 @@ function renderCard(item) {
   const tid  = item.thread_id;
   const conf = p.confidence != null ? p.confidence : 0;
   const pct  = Math.round(conf * 100);
-  // A card with no proposal data is a stale entry from a pre-Phase-4 run
   const isStale = !item.proposal;
-  return `
-<div class="card${isStale ? ' card-stale' : ''}" id="card-${tid}">
-  ${isStale ? `<div class="stale-banner">⚠ Stale entry — no checkpoint found. Dismiss to clear, or restart Janus and let it redetect the file.</div>` : ''}
-  <div class="card-head">
-    <span class="card-filename">${esc(item.filename)}</span>
-    <span class="badge ${confClass(conf)}">${pct}% confidence</span>
-    <span class="badge">${esc(p.category || 'Other')}</span>
-    ${p.intent ? `<span class="badge">${esc(p.intent)}</span>` : ''}
-  </div>
-  <div class="proposal-row">
-    <span class="arrow">→</span>
-    <span class="rename-val">${esc(p.rename_to || item.filename)}</span>
-  </div>
-  <div class="proposal-row">
-    <span class="arrow">📁</span>
-    <span class="dest-val">${esc(p.destination || '')}</span>
-  </div>
-  ${p.summary ? `<div class="summary">${esc(p.summary)}</div>` : ''}
-  <div class="card-actions">
-    ${isStale
-      ? `<button class="btn btn-reject" onclick="doDismiss('${tid}')">✕ Dismiss stale entry</button>`
-      : `<button class="btn btn-approve" onclick="doApprove('${tid}')">✓ Approve</button>
-         <button class="btn btn-edit" onclick="toggleEdit('${tid}')">✎ Edit</button>
-         <button class="btn btn-reject" onclick="doReject('${tid}')">✗ Reject</button>`
-    }
-  </div>
-  <div class="edit-form" id="edit-${tid}">
-    <label>Rename to</label>
-    <input type="text" id="ren-${tid}" value="${esc(p.rename_to || item.filename)}">
-    <label>Destination folder</label>
-    <input type="text" id="dst-${tid}" value="${esc(p.destination || '')}">
-    <div class="edit-form-actions">
-      <button class="btn btn-approve" onclick="doApproveEdit('${tid}')">✓ Approve with edits</button>
-      <button class="btn btn-edit" onclick="toggleEdit('${tid}')">Cancel</button>
-    </div>
-  </div>
-</div>`;
+  return '<div class="card' + (isStale ? ' card-stale' : '') + '" id="card-' + tid + '">' +
+    (isStale ? '<div class="stale-banner">⚠ Stale entry — no checkpoint found. Dismiss to clear.</div>' : '') +
+    '<div class="card-head">' +
+      '<span class="card-filename">' + esc(item.filename) + '</span>' +
+      '<span class="badge ' + confClass(conf) + '">' + pct + '% ' + esc(p.category || '') + '</span>' +
+    '</div>' +
+    (p.rename_to ? '<div class="proposal-row"><span class="arrow">→</span><span class="rename-val">' + esc(p.rename_to) + '</span></div>' : '') +
+    (p.destination ? '<div class="proposal-row"><span class="arrow">📂</span><span class="dest-val">' + esc(p.destination) + '</span></div>' : '') +
+    (p.summary ? '<div class="summary">' + esc(p.summary) + '</div>' : '') +
+    (p.intent ? '<div class="intent-tag">Intent: ' + esc(p.intent) + '</div>' : '') +
+    '<div class="card-actions">' +
+      (isStale
+        ? '<button class="btn btn-edit" onclick="dismissCard(\'' + tid + '\')">Dismiss</button>'
+        : '<button class="btn btn-approve" onclick="submitApprove(\'' + tid + '\')">Approve</button>' +
+          '<button class="btn btn-edit" onclick="openEdit(\'' + tid + '\')">Edit</button>' +
+          '<button class="btn btn-reject" onclick="submitReject(\'' + tid + '\')">Reject</button>' +
+          '<button class="btn btn-edit" style="color:var(--muted);font-size:11px" onclick="dismissCard(\'' + tid + '\')">Dismiss</button>') +
+    '</div>' +
+    '<div class="edit-form" id="edit-' + tid + '">' +
+      '<label>Rename to</label>' +
+      '<input id="ef-rename-' + tid + '" value="' + esc(p.rename_to || '') + '">' +
+      '<label>Destination folder</label>' +
+      '<input id="ef-dest-' + tid + '" value="' + esc(p.destination || '') + '">' +
+      '<label>Note (optional)</label>' +
+      '<input id="ef-note-' + tid + '" placeholder="optional note...">' +
+      '<div class="card-actions" style="margin-top:12px">' +
+        '<button class="btn btn-approve" onclick="submitApprove(\'' + tid + '\', true)">Approve with edits</button>' +
+        '<button class="btn btn-edit" onclick="openEdit(\'' + tid + '\')">Cancel</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
 }
 
-function toggleEdit(tid) {
+function openEdit(tid) {
   const f = document.getElementById('edit-' + tid);
   f.classList.toggle('open');
 }
 
-async function doApprove(tid) {
-  disable(tid);
+async function submitApprove(tid, withEdits) {
+  const body = { approved: true };
+  if (withEdits) {
+    body.rename_to   = document.getElementById('ef-rename-' + tid).value.trim() || null;
+    body.destination = document.getElementById('ef-dest-'   + tid).value.trim() || null;
+    body.note        = document.getElementById('ef-note-'   + tid).value.trim() || null;
+  }
   try {
-    await api('POST', `/api/approve/${tid}`, {});
-    removeCard(tid); loadStats();
+    await api('POST', '/api/approve/' + tid, body);
+    document.getElementById('card-' + tid)?.remove();
+    await loadStats();
   } catch(e) {
     let msg = e.message;
     try { msg = JSON.parse(msg).detail || msg; } catch(_) {}
-    alert('Approve failed: ' + msg);
-    enable(tid);
+    showToast('Approve failed: ' + msg, 5000);
   }
 }
 
-async function doApproveEdit(tid) {
-  disable(tid);
-  const rename_to   = document.getElementById('ren-' + tid).value.trim();
-  const destination = document.getElementById('dst-' + tid).value.trim();
+async function submitReject(tid) {
   try {
-    await api('POST', `/api/approve/${tid}`, { rename_to, destination });
-    removeCard(tid); loadStats();
-  } catch(e) { alert('Approve failed: ' + e.message); enable(tid); }
-}
-
-async function doReject(tid) {
-  if (!confirm('Reject this file? It will stay in place.')) return;
-  disable(tid);
-  try {
-    await api('POST', `/api/reject/${tid}`, {});
-    removeCard(tid); loadStats();
+    await api('POST', '/api/reject/' + tid, {});
+    document.getElementById('card-' + tid)?.remove();
+    await loadStats();
   } catch(e) {
-    // 409 = no checkpoint (stale or still processing)
-    if (e.message && e.message.includes('"status":409') || e.message.includes('409')) {
-      alert('Cannot reject: ' + JSON.parse(e.message).detail);
-    } else {
-      alert('Reject failed: ' + e.message);
-    }
-    enable(tid);
+    let msg = e.message;
+    try { msg = JSON.parse(msg).detail || msg; } catch(_) {}
+    showToast('Reject failed: ' + msg, 5000);
   }
 }
 
-async function doDismiss(tid) {
-  if (!confirm('Remove this stale entry from the queue? The file itself will not be touched.')) return;
-  disable(tid);
+async function undoMove(tid) {
   try {
-    await api('POST', `/api/dismiss/${tid}`, {});
-    removeCard(tid); loadStats();
-  } catch(e) { alert('Dismiss failed: ' + e.message); enable(tid); }
+    const r = await api('POST', '/api/undo/' + tid);
+    showToast('Restored to ' + r.restored_to);
+    await loadStats();
+  } catch(e) {
+    let msg = e.message;
+    try { msg = JSON.parse(msg).detail || msg; } catch(_) {}
+    showToast('Undo failed: ' + msg, 5000);
+  }
 }
 
-function removeCard(tid) {
-  const c = document.getElementById('card-' + tid);
-  if (c) { c.style.opacity = '0'; c.style.transition = 'opacity .3s'; setTimeout(() => { c.remove(); loadQueue(); }, 300); }
+async function doDismissAll() {
+  const hint = document.getElementById('queue-bulk-hint');
+  if (!confirm('Dismiss all pending items? This cannot be undone.')) return;
+  try {
+    const r = await api('POST', '/api/dismiss-all');
+    showToast('Dismissed ' + (r.dismissed || 0) + ' item' + (r.dismissed===1?'':'s'));
+    await loadQueue();
+    await loadStats();
+  } catch(e) {
+    showToast('Dismiss all failed: ' + e.message, 4000);
+  }
 }
-function disable(tid) {
-  document.querySelectorAll(`#card-${tid} .btn`).forEach(b => b.disabled = true);
-}
-function enable(tid) {
-  document.querySelectorAll(`#card-${tid} .btn`).forEach(b => b.disabled = false);
+
+async function dismissCard(tid) {
+  try {
+    await api('POST', '/api/dismiss/' + tid);
+    document.getElementById('card-' + tid)?.remove();
+    await loadStats();
+  } catch(e) {
+    showToast('Dismiss failed: ' + e.message, 4000);
+  }
 }
 
 // ── Activity ─────────────────────────────────────────────────────
 async function loadActivity() {
   const el = document.getElementById('activity-list');
   try {
-    const rows = await api('GET', '/api/activity?limit=60');
+    const rows = await api('GET', '/api/activity');
     if (!rows.length) {
-      el.innerHTML = `<div class="empty"><div class="icon">📭</div><p>No activity yet.</p></div>`;
+      el.innerHTML = '<div class="empty"><p>No activity yet.</p></div>';
       return;
     }
-    el.innerHTML = rows.map(renderActivity).join('');
-  } catch(e) { el.innerHTML = `<p style="color:var(--danger)">Error: ${e.message}</p>`; }
-}
-
-const STATUS_ICON = { approved:'✅', rejected:'🚫', duplicate:'🔁', pending:'⏳', undone:'↩️' };
-const STATUS_PILL = { approved:'pill-approved', rejected:'pill-rejected', duplicate:'pill-duplicate', pending:'pill-pending', undone:'pill-undone' };
-
-function renderActivity(row) {
-  const icon   = STATUS_ICON[row.status] || '📄';
-  const pill   = STATUS_PILL[row.status] || '';
-  const ts     = row.created_at ? new Date(row.created_at).toLocaleString() : '';
-  const detail = row.moved_to || row.path || '';
-  const canUndo = row.status === 'approved';
-  return `
-<div class="activity-item" id="act-${row.thread_id}">
-  <span class="activity-icon">${icon}</span>
-  <div class="activity-info">
-    <div class="activity-filename">${esc(row.filename)}</div>
-    <div class="activity-detail">${esc(detail)}</div>
-  </div>
-  <span class="status-pill ${pill}">${row.status}</span>
-  <span class="activity-time">${ts}</span>
-  ${canUndo ? `<button class="btn btn-undo" onclick="doUndo('${row.thread_id}')">↩ Undo</button>` : ''}
-</div>`;
-}
-
-async function doUndo(tid) {
-  if (!confirm('Move the file back to its original location?')) return;
-  try {
-    await api('POST', `/api/undo/${tid}`, {});
-    loadActivity(); loadStats();
-  } catch(e) { alert('Undo failed: ' + e.message); }
+    el.innerHTML = rows.map(r => {
+      const pillClass = {
+        approved: 'pill-approved', rejected: 'pill-rejected',
+        duplicate: 'pill-dupe',   undone: 'pill-undone',
+        pending: 'pill-pending',  dismissed: 'pill-rejected',
+        auto_approved: 'pill-approved',
+      }[r.status] || '';
+      const ts = r.created_at ? new Date(r.created_at + 'Z').toLocaleString() : '';
+      const p  = r.proposal ? JSON.parse(r.proposal) : {};
+      return '<div class="activity-row">' +
+        '<span class="pill ' + pillClass + '">' + esc(r.status) + '</span>' +
+        '<span class="act-filename">' + esc(r.filename) + '</span>' +
+        (p.category ? '<span class="act-cat">' + esc(p.category) + '</span>' : '') +
+        (r.moved_to ? '<span class="act-dest" title="' + esc(r.moved_to) + '">→ ' + esc(r.moved_to.split(/[\\/]/).pop()) + '</span>' : '') +
+        (r.status === 'approved' ? '<button class="btn btn-undo" onclick="undoMove(\'' + esc(r.thread_id) + '\')">Undo</button>' : '') +
+        '<span class="act-ts">' + esc(ts) + '</span>' +
+        '</div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="empty"><p>Could not load activity.</p></div>';
+  }
 }
 
 // ── Rules ────────────────────────────────────────────────────────
 async function loadRules() {
   try {
-    const rules = await api('GET', '/api/rules');
-    _rulesCache = rules;
+    const r = await api('GET', '/api/rules');
+    _rulesCache = r;
     const tbody = document.querySelector('#rules-table tbody');
-    tbody.innerHTML = Object.entries(rules.categories || {}).map(([cat, cfg]) => `
-<tr>
-  <td>${esc(cat)}</td>
-  <td><input type="text" data-cat="${esc(cat)}" value="${esc(cfg.destination || '')}"></td>
-</tr>`).join('');
-  } catch(e) { alert('Could not load rules: ' + e.message); }
+    const cats  = r.categories || {};
+    tbody.innerHTML = Object.entries(cats).map(([name, cfg]) =>
+      '<tr><td>' + esc(name) + '</td><td>' +
+      '<input id="rule-' + esc(name) + '" value="' + esc(cfg.destination || '') + '">' +
+      '</td></tr>'
+    ).join('');
+  } catch(e) {}
 }
 
 async function saveRules() {
   if (!_rulesCache) return;
-  const cats = { ..._rulesCache.categories };
-  document.querySelectorAll('#rules-table input').forEach(inp => {
-    const cat = inp.dataset.cat;
-    if (cats[cat]) cats[cat] = { ...cats[cat], destination: inp.value.trim() };
+  const updated = JSON.parse(JSON.stringify(_rulesCache));
+  Object.keys(updated.categories || {}).forEach(name => {
+    const inp = document.getElementById('rule-' + name);
+    if (inp) updated.categories[name].destination = inp.value.trim();
   });
   try {
-    await api('POST', '/api/rules', { categories: cats });
+    await api('POST', '/api/rules', updated);
     const msg = document.getElementById('save-msg');
     msg.classList.add('show');
     setTimeout(() => msg.classList.remove('show'), 2500);
-  } catch(e) { alert('Save failed: ' + e.message); }
+  } catch(e) {
+    showToast('Save failed: ' + e.message, 4000);
+  }
 }
 
-// ── SSE — live feed ──────────────────────────────────────────────
+// ── SSE live feed ────────────────────────────────────────────────
 function startSSE() {
-  const src = new EventSource('/api/feed');
-  src.onmessage = (e) => {
-    if (!e.data || e.data.trim() === '') return;
-    try {
-      const ev = JSON.parse(e.data);
-      handleLiveEvent(ev);
-    } catch(_) {}
+  const es = new EventSource('/api/feed');
+  es.onmessage = e => {
+    try { handleLiveEvent(JSON.parse(e.data)); } catch(_) {}
   };
-  src.onerror = () => setTimeout(startSSE, 5000);
 }
 
 function handleLiveEvent(ev) {
   loadStats();
-  // If the approved/rejected/duplicate card is still in the queue, remove it
+
+  if (ev.type === 'auto_approved') {
+    const card = document.getElementById('card-' + ev.thread_id);
+    if (card) card.remove();
+    return;
+  }
+
+  if (ev.type === 'dismissed_all') {
+    loadQueue(); loadStats();
+    return;
+  }
+
   if (['approved','rejected','duplicate'].includes(ev.type)) {
     const card = document.getElementById('card-' + ev.thread_id);
     if (card) { card.remove(); loadQueue(); }
   }
-  // Prepend to activity list if that tab is showing
+
+  // Scan events
+  if (ev.type === 'scan_started') {
+    _showScanPanel();
+    _setScanStats(0, 0, 0, 0);
+    setScanProgress(0, 0, 'Discovering files on ' + (ev.drives || []).join(', ') + '...');
+    document.getElementById('scan-current-wrap').style.display = '';
+    document.getElementById('scan-current-name').textContent = 'discovering files…';
+    document.getElementById('scan-current-idx').textContent = '';
+  }
+
+  if (ev.type === 'scan_progress') {
+    _setScanStats(ev.found || 0, ev.queued || 0, ev.skipped || 0, ev.errors || 0);
+    setScanProgress(
+      (ev.queued || 0) + (ev.skipped || 0) + (ev.errors || 0),
+      ev.found || 0,
+      ev.current || ''
+    );
+  }
+
+  if (ev.type === 'scan_current') {
+    document.getElementById('scan-current-wrap').style.display = '';
+    document.getElementById('scan-current-name').textContent = ev.filename || '…';
+    document.getElementById('scan-current-idx').textContent = (ev.idx || '') + ' / ' + (ev.found || '');
+  }
+
+  if (ev.type === 'scan_file') {
+    _setScanStats(ev.found || 0, ev.queued || 0, ev.skipped || 0, ev.errors || 0);
+    setScanProgress(ev.idx || 0, ev.found || 0, ev.filename || '');
+    _appendScanLog(ev.filename, ev.result, ev.idx, ev.found);
+    // If a file was queued and the Queue tab is open, refresh it
+    if (ev.result === 'queued' &&
+        document.getElementById('tab-queue').classList.contains('active')) {
+      loadQueue();
+    }
+  }
+
+  if (ev.type === 'scan_complete') {
+    document.getElementById('scan-current-wrap').style.display = 'none';
+    const done = (ev.queued || 0) + (ev.skipped || 0) + (ev.errors || 0);
+    setScanProgress(done, ev.found || 0, '');
+    _setScanStats(ev.found || 0, ev.queued || 0, ev.skipped || 0, ev.errors || 0);
+    const resultEl = document.getElementById('scan-result-text');
+    if ((ev.queued || 0) === 0 && (ev.found || 0) === 0) {
+      resultEl.textContent = 'Scan complete — no files found (drives may be empty or all excluded).';
+    } else if ((ev.queued || 0) === 0) {
+      resultEl.textContent = 'Scan complete — ' + ev.found + ' files found, all already organised or below threshold.';
+    } else {
+      resultEl.textContent = 'Scan complete — ' + ev.queued + ' file' + (ev.queued===1?'':'s') + ' added to the queue' +
+        (ev.skipped ? ', ' + ev.skipped + ' already organised' : '') +
+        (ev.errors  ? ', ' + ev.errors  + ' error(s)' : '') + '. Check the Queue tab.';
+    }
+    _resetScanUI();
+    loadQueue(); loadStats();
+  }
+
   if (document.getElementById('tab-activity').classList.contains('active')) {
     loadActivity();
   }
+}
+
+// ── Scan ─────────────────────────────────────────────────────────
+async function loadScanDrives() {
+  try {
+    const r = await api('GET', '/api/scan/drives');
+    _renderDrives(r.drives || []);
+  } catch(e) {
+    document.getElementById('scan-drives-grid').innerHTML =
+      '<span style="color:var(--danger)">Could not load drives: ' + esc(e.message) + '</span>';
+  }
+}
+
+function _renderDrives(drives) {
+  const grid = document.getElementById('scan-drives-grid');
+  if (!drives.length) {
+    grid.innerHTML = '<span style="color:var(--muted)">No drives detected.</span>';
+    return;
+  }
+  grid.innerHTML = drives.map(d =>
+    '<label class="drive-card" id="drive-card-' + d.letter + '" onclick="toggleDrive(\'' + d.letter + '\',event)">' +
+      '<input type="checkbox" class="drive-cb" value="' + d.path + '" id="drive-cb-' + d.letter + '">' +
+      '<div class="drive-letter">' + esc(d.letter) + ':</div>' +
+      '<div class="drive-meta">' + d.used_gb + 'GB used &bull; ' + d.free_gb + 'GB free</div>' +
+      '<div class="drive-bar"><div class="drive-bar-fill" style="width:' + (d.used_pct||0) + '%"></div></div>' +
+    '</label>'
+  ).join('');
+  document.getElementById('scan-select-hint').textContent =
+    drives.length + ' drive' + (drives.length===1?'':'s') + ' detected — select to include in scan.';
+}
+
+function toggleDrive(letter, e) {
+  e.preventDefault();
+  const cb   = document.getElementById('drive-cb-'   + letter);
+  const card = document.getElementById('drive-card-' + letter);
+  cb.checked = !cb.checked;
+  card.classList.toggle('selected', cb.checked);
+}
+
+async function doStartScan() {
+  const selected = Array.from(document.querySelectorAll('.drive-cb:checked')).map(cb => cb.value);
+  if (!selected.length) { showToast('Select at least one drive first.'); return; }
+
+  document.getElementById('btn-scan').disabled = true;
+  document.getElementById('btn-scan-stop').style.display = '';
+  document.getElementById('scan-result-text').textContent = '';
+  _showScanPanel();
+  clearScanLog();
+  _setScanStats(0, 0, 0, 0);
+  setScanProgress(0, 0, 'Requesting scan...');
+
+  const deepScan = document.getElementById('chk-deep-scan').checked;
+  try {
+    const r = await api('POST', '/api/scan/start', { drives: selected, deep_scan: deepScan });
+    showToast(r.message || 'Scan started');
+  } catch(e) {
+    let msg = e.message;
+    try { msg = JSON.parse(msg).detail || msg; } catch(_) {}
+    showToast('Scan error: ' + msg, 5000);
+    _resetScanUI();
+  }
+}
+
+async function doStopScan() {
+  try { await api('POST', '/api/scan/stop'); } catch(_) {}
+  showToast('Stopping scan after current file...');
+}
+
+function _showScanPanel() {
+  document.getElementById('scan-progress-panel').style.display = '';
+}
+
+function setScanProgress(done, found, current) {
+  const fill = document.getElementById('scan-progress-fill');
+  const text = document.getElementById('scan-progress-text');
+  const pct  = found > 0 ? Math.min(100, Math.round(done / found * 100)) : 0;
+  fill.style.width = pct + '%';
+  text.textContent = found > 0
+    ? done + ' / ' + found + ' files processed (' + pct + '%)' + (current ? ' — ' + current : '')
+    : (current || 'Scanning...');
+}
+
+function _setScanStats(found, queued, skipped, errors) {
+  document.getElementById('ss-found').textContent   = found;
+  document.getElementById('ss-queued').textContent  = queued;
+  document.getElementById('ss-skipped').textContent = skipped;
+  document.getElementById('ss-errors').textContent  = errors;
+}
+
+function _appendScanLog(filename, result, idx, found) {
+  const log = document.getElementById('scan-log');
+  if (!log) return;
+
+  // Trim old entries
+  while (log.children.length >= SCAN_LOG_MAX) {
+    log.removeChild(log.lastChild);
+  }
+
+  const icon = result === 'queued'  ? '✅'
+             : result === 'skipped' ? '⏭'
+             : '❌';
+  const entry = document.createElement('div');
+  entry.className = 'scan-log-entry';
+  entry.innerHTML =
+    '<span class="log-icon">' + icon + '</span>' +
+    '<span class="log-filename" title="' + esc(filename) + '">' + esc(filename) + '</span>' +
+    '<span class="log-result ' + result + '">' + result + '</span>' +
+    '<span class="log-idx">' + idx + '/' + found + '</span>';
+
+  // Prepend so newest is at top
+  log.insertBefore(entry, log.firstChild);
+}
+
+function clearScanLog() {
+  const log = document.getElementById('scan-log');
+  if (log) log.innerHTML = '';
+  document.getElementById('scan-result-text').textContent = '';
+}
+
+function _resetScanUI() {
+  document.getElementById('btn-scan').disabled = false;
+  document.getElementById('btn-scan-stop').style.display = 'none';
+  document.getElementById('scan-current-wrap').style.display = 'none';
 }
 
 // ── Utilities ────────────────────────────────────────────────────
@@ -498,8 +943,10 @@ function esc(s) {
 (function init() {
   loadStats();
   loadQueue();
+  loadConfig();
+  loadScanDrives();
   startSSE();
-  setInterval(() => {
+  setInterval(function() {
     loadStats();
     if (document.getElementById('tab-queue').classList.contains('active')) loadQueue();
   }, 10000);
